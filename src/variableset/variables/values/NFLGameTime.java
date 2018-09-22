@@ -1,4 +1,4 @@
-package variables.value;
+package variableset.variables.values;
 
 /**
  * A class describing the time of an NFL game.

@@ -1,6 +1,6 @@
-package variables;
+package variableset.variables;
 
-import variables.value.Value;
+import variableset.variables.values.Value;
 
 /**
  * Variable object for CSP.
@@ -9,7 +9,7 @@ import variables.value.Value;
  * @param <A> The type of object to pass to the variable setter.
  * @param <R> The type of object to be returned form the variable getter.
  * 
- * Done in the <A,R> manner to allow for static information to be stored within
+ * Done in the <A, R> manner to allow for static information to be stored within
  *  the Variable that does not be to be passed to the setter but can be returned
  *  by the getter.
  */

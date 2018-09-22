@@ -1,4 +1,4 @@
-package variables.value;
+package variableset.variables.values;
 
 /**
  * NFL game possibilities per week.

@@ -1,8 +1,8 @@
-package variables;
+package variableset.variables;
 
 import domains.Matchup;
-import variables.value.NFLGameSlotInfo;
-import variables.value.NFLGameTime;
+import variableset.variables.values.NFLGameSlotInfo;
+import variableset.variables.values.NFLGameTime;
 
 /**
  * A slot for an NFL matchup with static game time variables.
