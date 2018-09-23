@@ -10,12 +10,13 @@ public class Team {
 	/**
 	 * Creates an object to represent a Team.
 	 * @param name the name of the team.
-	 * TODO: locations for flight travel estimation?
+	 * @param teamData relevant data for the specific team.
 	 */
-	public Team(String name) {
+	public Team(String name, TeamData teamData) {
 		
 		// initialize
 		this.name = name;
+		this.teamData = teamData;
 		
 	}
 	
@@ -27,7 +28,16 @@ public class Team {
 		return this.name;
 	}
 	
+	/**
+	 * Gets the team data for this team.
+	 * @return the team data.
+	 */
+	public TeamData getTeamData() {
+		return this.teamData;
+	}
+	
 	// variables
 	private String name;
+	private TeamData teamData;
 	
 }

@@ -2,6 +2,7 @@ package variableset;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 
 import variableset.variables.NFLGameSlot;
 
@@ -15,8 +16,8 @@ public class NFLGameSlotSet implements VariableSet<NFLGameSlot> {
 	/**
 	 * Initializes a set structuring the NFL regular season scheduling.
 	 */
-	public NFLGameSlotSet() {
-		
+	public NFLGameSlotSet(Scanner s) {
+
 		// initialization
 		// TODO: same variable in multiple lists
 		this.allGames = new LinkedList<>();
