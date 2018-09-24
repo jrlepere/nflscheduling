@@ -12,8 +12,9 @@ public interface VariableSet<V extends Variable<?,?>> {
 	/**
 	 * Gets the next variable to try and set.
 	 * @return the next variable.
+	 * @throws Exception all variables are already set.
 	 */
-	public V getVariableToSet();
+	public V getVariableToSet() throws Exception;
 	
 	/**
 	 * Tests if the variable set is complete.

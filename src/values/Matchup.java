@@ -1,11 +1,11 @@
-package domains;
+package values;
 
 /**
  * An NFL matchup class.
  * @author jlepere2
  * @date 09/22/2018
  */
-public class Matchup {
+public class Matchup implements Value {
 
 	/**
 	 * Creates an NFL matchup.
@@ -18,7 +18,7 @@ public class Matchup {
 		// initialize
 		this.homeTeam = homeTeam;
 		this.awayTeam = awayTeam;
-		this.score = score;
+		this.score = score; // TODO: maybe calculate score instead of pass
 		
 	}
 	
@@ -44,6 +44,10 @@ public class Matchup {
 	 */
 	public int getScore() {
 		return this.score;
+	}
+	
+	public String toString() {
+		return this.awayTeam + " @ " + this.homeTeam;
 	}
 	
 	// variables

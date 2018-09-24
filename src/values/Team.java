@@ -1,4 +1,4 @@
-package domains;
+package values;
 
 /**
  * An NFL team.
@@ -34,6 +34,10 @@ public class Team {
 	 */
 	public TeamData getTeamData() {
 		return this.teamData;
+	}
+	
+	public String toString() {
+		return this.name;
 	}
 	
 	// variables

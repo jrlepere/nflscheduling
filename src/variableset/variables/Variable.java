@@ -1,6 +1,6 @@
 package variableset.variables;
 
-import variableset.variables.values.Value;
+import values.Value;
 
 /**
  * Variable object for CSP.
@@ -13,7 +13,7 @@ import variableset.variables.values.Value;
  *  the Variable that does not be to be passed to the setter but can be returned
  *  by the getter.
  */
-public interface Variable<A, R extends Value> {
+public interface Variable<A extends Value, R extends Value> {
 	
 	/**
 	 * Sets the value for the variable.

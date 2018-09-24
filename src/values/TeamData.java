@@ -1,4 +1,4 @@
-package domains;
+package values;
 
 /**
  * A class for team specific and relevant data.

@@ -1,6 +1,4 @@
-package variableset.variables.values;
-
-import domains.Matchup;
+package values;
 
 /**
  * A class representing the scheduling information for an NFL game.
@@ -36,6 +34,10 @@ public class NFLGameSlotInfo implements Value {
 	 */
 	public boolean isSet() {
 		return matchup != null;
+	}
+	
+	public String toString() {
+		return this.matchup.toString();
 	}
 	
 	// variables

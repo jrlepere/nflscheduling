@@ -1,8 +1,8 @@
 package variableset.variables;
 
-import domains.Matchup;
-import variableset.variables.values.NFLGameSlotInfo;
-import variableset.variables.values.NFLGameTime;
+import values.Matchup;
+import values.NFLGameSlotInfo;
+import values.NFLGameTime;
 
 /**
  * A slot for an NFL matchup with static game time variables.
@@ -32,6 +32,10 @@ public class NFLGameSlot implements Variable<Matchup, NFLGameSlotInfo> {
 	
 	public boolean isSet() {
 		return gameSlotInfo.isSet();
+	}
+	
+	public String toString() {
+		return this.gameSlotInfo.toString();
 	}
 	
 	// variables

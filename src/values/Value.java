@@ -1,4 +1,4 @@
-package variableset.variables.values;
+package values;
 
 /**
  * Interface for the Variable values.
