@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Scanner;
 
 import constraints.Constraint;
+import constraints.NoBackToBack;
+import constraints.OneGamePerTeamPerWeek;
 import csp.CSP;
 import domains.NFLMatchupSet;
 import variableset.NFLGameSlotSet;
@@ -17,7 +19,9 @@ public class NFLSchedling {
 		
 		NFLGameSlotSet variableSet = new NFLGameSlotSet();
 		NFLMatchupSet domain = new NFLMatchupSet(matchupScanner, teamDataScanner);
-		List<Constraint<NFLGameSlotSet>> constraints = new LinkedList<>();
+		List<Constraint> constraints = new LinkedList<>();
+		constraints.add(new OneGamePerTeamPerWeek(variableSet));
+		constraints.add(new NoBackToBack(variableSet));
 		
 		CSP<NFLGameSlotSet,NFLMatchupSet,?,?,?> csp = new CSP<>();
 		System.out.println(csp.solve(variableSet, domain, constraints));

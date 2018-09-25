@@ -11,7 +11,7 @@ import variableset.variables.Variable;
 
 public class CSP<VS extends VariableSet<V>, D extends Domain<A>, V extends Variable<A,R>, A extends Value, R extends Value> {
 	
-	public VS solve(VS variableSet, D domain, List<Constraint<VS>> constraints) throws Exception {
+	public VS solve(VS variableSet, D domain, List<Constraint> constraints) throws Exception {
 		
 		// initialization
 		this.variableSet = variableSet;
@@ -21,21 +21,34 @@ public class CSP<VS extends VariableSet<V>, D extends Domain<A>, V extends Varia
 		// backtrack to the solution
 		this.backTracking();
 		
+		this.test = 0;
+		
 		// return the solution
 		return this.variableSet;
 	}
 	
 	private boolean backTracking() throws Exception {
+		/*
+		 * TODO:
+		 * - Hashmap for values tried??
+		 * - return -1 if does not have next, else return index of next!
+		 */
 		
-		// stop when variable set is completely filled
-		if (this.variableSet.isComplete()) {return true;}
+		int t = this.variableSet.getNumberSet();
+		if (t > this.test) {
+			this.test = t;
+			System.out.println(this.test);
+		}
 		
 		// test current constraints are satisfied
-		for (Constraint<VS> c : this.constrains) {
-			if (!c.isAcceptable(this.variableSet)) {
+		for (Constraint c : this.constrains) {
+			if (!c.isAcceptable()) {
 				return false;
 			}
 		}
+		
+		// stop when variable set is completely filled
+		if (this.variableSet.isComplete()) {return true;}
 		
 		// get the next variable to set
 		Variable<A, R> var = this.variableSet.getVariableToSet();
@@ -44,10 +57,13 @@ public class CSP<VS extends VariableSet<V>, D extends Domain<A>, V extends Varia
 		List<A> valuesTried = new LinkedList<>();
 		
 		// try each available value in the domain
-		while (this.domain.hasNext()) {
+		while (true) {
 			
 			// get the next value to set
 			A val = this.domain.getNext(valuesTried);
+			
+			// if value is null, there are no more possible values for the current configuration
+			if (val == null) break;
 			
 			// set the variable to the value
 			var.setVariable(val);
@@ -68,13 +84,17 @@ public class CSP<VS extends VariableSet<V>, D extends Domain<A>, V extends Varia
 			
 		}
 		
+		// free up the variable
+		var.freeVariable();
+		
 		// none of the values worked, previous assignment was invalid
 		return false;
 		
 	}
 	
+	private int test;
 	private VS variableSet;
 	private D domain;
-	private List<Constraint<VS>> constrains;
+	private List<Constraint> constrains;
 	
 }

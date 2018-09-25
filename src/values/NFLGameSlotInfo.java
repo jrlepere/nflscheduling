@@ -33,7 +33,19 @@ public class NFLGameSlotInfo implements Value {
 	 * @return true if the matchup is set, false otherwise.
 	 */
 	public boolean isSet() {
-		return matchup != null;
+		return this.matchup != null;
+	}
+	
+	public Team getHomeTeam() {
+		return this.matchup.getHomeTeam();
+	}
+	
+	public Team getAwayTeam() {
+		return this.matchup.getAwayTeam();
+	}
+	
+	public int getWeekNumber() {
+		return this.gameTime.getWeekNumber();
 	}
 	
 	public String toString() {

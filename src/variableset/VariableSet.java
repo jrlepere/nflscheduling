@@ -22,4 +22,6 @@ public interface VariableSet<V extends Variable<?,?>> {
 	 */
 	public boolean isComplete();
 	
+	public int getNumberSet();
+	
 }

@@ -1,5 +1,6 @@
 package domains;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -22,10 +23,15 @@ public class NFLMatchupSet implements Domain<Matchup> {
 		teamDataScanner.nextLine();
 		
 		// read each team and add to map
+		int index = 0;
 		while (teamDataScanner.hasNextLine()) {
 			String[] teamData = teamDataScanner.nextLine().split(",");
-			teams.put(teamData[0], new Team(teamData[0], new TeamData(0, 0, 0)));
+			teams.put(teamData[0], new Team(teamData[0], index, new TeamData(0, 0, 0)));
+			index += 1;
 		}
+		
+		// store the collection
+		this.teams = teams.values();
 		
 		// list of Matchups
 		this.matchups = new LinkedList<>();
@@ -39,18 +45,16 @@ public class NFLMatchupSet implements Domain<Matchup> {
 			this.matchups.add(new Matchup(teams.get(teamNames[0]), teams.get(teamNames[1]), 0));
 		}
 		
+		// shuffle the matchups
+		//Collections.shuffle(this.matchups);
+		
 		// TODO: validation, matchup ranking score, team data definition/extraction
 		
 	}
 	
 	
-	public Matchup getNext(List<Matchup> valuesTried) throws Exception {
+	public Matchup getNext(List<Matchup> valuesTried) {
 		// TODO: randomness/priority
-		
-		// validate there is at least one Matchup in the queue
-		if (this.matchups.size() == 0) {
-			throw new Exception("Their are no more Matchups in the Domain!");
-		}
 		
 		// return the first value that has yet to been tried
 		// TODO: optimize
@@ -59,24 +63,27 @@ public class NFLMatchupSet implements Domain<Matchup> {
 				return this.matchups.remove(i);
 			}
 		}
-		
-		// already tried all in domain
-		throw new Exception("Tried all available values in the domain!");
-		
-	}
-	
-	public void addBack(Matchup element) {
-		// TODO maybe optimization
-		this.matchups.add(element);
-	}
-	
-	public boolean hasNext() {
-		return matchups.size() != 0;
-	}
-	
-	private List<Matchup> matchups;
 
+		return null;
+		
+	}
 	
+	public void addBack(Matchup value) {
+		// TODO maybe optimization
+		this.matchups.add(value);
+	}
+	
+	/**
+	 * Gets a collection of all the teams.
+	 * @return a collection of all the teams.
+	 */
+	public Collection<Team> getTeams() {
+		return this.teams;
+	}
+	
+	// variables
+	private List<Matchup> matchups;
+	private Collection<Team> teams;
 	
 
 }

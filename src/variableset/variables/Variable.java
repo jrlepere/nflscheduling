@@ -28,6 +28,11 @@ public interface Variable<A extends Value, R extends Value> {
 	R getVariable();
 	
 	/**
+	 * Frees the variable.
+	 */
+	void freeVariable();
+	
+	/**
 	 * Returns if the variable as been set.
 	 * @return true if the variable has been set, false otherwise.
 	 */
