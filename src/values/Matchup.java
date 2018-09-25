@@ -11,13 +11,15 @@ public class Matchup implements Value {
 	 * Creates an NFL matchup.
 	 * @param homeTeam the home team.
 	 * @param awayTeam the away team.
+	 * @param index a unique index [0,255] for the matchup.
 	 * @param score the computed score of the matchup.
 	 */
-	public Matchup(Team homeTeam, Team awayTeam, int score) {
+	public Matchup(Team homeTeam, Team awayTeam, int index, int score) {
 		
 		// initialize
 		this.homeTeam = homeTeam;
 		this.awayTeam = awayTeam;
+		this.index = index;
 		this.score = score; // TODO: maybe calculate score instead of pass
 		
 	}
@@ -38,6 +40,10 @@ public class Matchup implements Value {
 		return this.awayTeam;
 	}
 	
+	public int getIndex() {
+		return this.index;
+	}
+	
 	/**
 	 * Gets the matchup score.
 	 * @return the score of the matchup.
@@ -53,6 +59,7 @@ public class Matchup implements Value {
 	// variables
 	private Team homeTeam;
 	private Team awayTeam;
+	private int index;
 	private int score;
 	
 }

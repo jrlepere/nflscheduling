@@ -1,9 +1,8 @@
 package csp;
 
-import java.util.LinkedList;
 import java.util.List;
 
-import constraints.Constraint;
+import constraintset.constraint.Constraint;
 import domains.Domain;
 import values.Value;
 import variableset.VariableSet;
@@ -28,12 +27,8 @@ public class CSP<VS extends VariableSet<V>, D extends Domain<A>, V extends Varia
 	}
 	
 	private boolean backTracking() throws Exception {
-		/*
-		 * TODO:
-		 * - Hashmap for values tried??
-		 * - return -1 if does not have next, else return index of next!
-		 */
 		
+		// testing
 		int t = this.variableSet.getNumberSet();
 		if (t > this.test) {
 			this.test = t;
@@ -53,8 +48,8 @@ public class CSP<VS extends VariableSet<V>, D extends Domain<A>, V extends Varia
 		// get the next variable to set
 		Variable<A, R> var = this.variableSet.getVariableToSet();
 		
-		// list of values tried for this variable
-		List<A> valuesTried = new LinkedList<>();
+		// array of values tried for this variable, by the value index
+		int[] valuesTried = new int[256]; // TODO
 		
 		// try each available value in the domain
 		while (true) {
@@ -79,7 +74,7 @@ public class CSP<VS extends VariableSet<V>, D extends Domain<A>, V extends Varia
 				 * add value to list of values tried for this variable
 				 */
 				this.domain.addBack(val);
-				valuesTried.add(val);
+				valuesTried[val.getIndex()] += 1;
 			}
 			
 		}

@@ -48,6 +48,14 @@ public class NFLGameSlotInfo implements Value {
 		return this.gameTime.getWeekNumber();
 	}
 	
+	public boolean isPrimeTime() {
+		return gameTime.isPrimeTime();
+	}
+	
+	public int getIndex() {
+		return this.matchup.getIndex();
+	}
+	
 	public String toString() {
 		return this.matchup.toString();
 	}

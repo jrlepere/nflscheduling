@@ -62,7 +62,6 @@ public class NFLGameSlotSet implements VariableSet<NFLGameSlot> {
 		this.currentSetCount -= 1;
 	}
 	
-	
 	public NFLGameSlot getVariableToSet() throws Exception {
 		for (NFLGameSlot gameSlot : this.allGames) {
 			if (!gameSlot.isSet()) {

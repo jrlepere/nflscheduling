@@ -40,9 +40,11 @@ public class NFLMatchupSet implements Domain<Matchup> {
 		matchupScanner.nextLine();
 		
 		// read each matchup and compute a score
+		index = 0;
 		while (matchupScanner.hasNextLine()) {
 			String[] teamNames = matchupScanner.nextLine().split(",");
-			this.matchups.add(new Matchup(teams.get(teamNames[0]), teams.get(teamNames[1]), 0));
+			this.matchups.add(new Matchup(teams.get(teamNames[0]), teams.get(teamNames[1]), index, 0));
+			index += 1;
 		}
 		
 		// shuffle the matchups
@@ -53,13 +55,13 @@ public class NFLMatchupSet implements Domain<Matchup> {
 	}
 	
 	
-	public Matchup getNext(List<Matchup> valuesTried) {
+	public Matchup getNext(int[] valuesTried) {
 		// TODO: randomness/priority
 		
 		// return the first value that has yet to been tried
 		// TODO: optimize
 		for (int i = 0; i < this.matchups.size(); i ++) {
-			if (!valuesTried.contains(this.matchups.get(i))) {
+			if (valuesTried[this.matchups.get(i).getIndex()] == 0) {
 				return this.matchups.remove(i);
 			}
 		}

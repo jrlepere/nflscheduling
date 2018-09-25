@@ -44,6 +44,10 @@ public class NFLGameSlot implements Variable<Matchup, NFLGameSlotInfo> {
 		return gameSlotInfo.isSet();
 	}
 	
+	public boolean isPrimeTime() {
+		return this.gameSlotInfo.isPrimeTime();
+	}
+	
 	public Team getHomeTeam() {
 		return this.gameSlotInfo.getHomeTeam();
 	}

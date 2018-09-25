@@ -36,6 +36,10 @@ public class NFLGameTime {
 		return this.day;
 	}
 	
+	public boolean isPrimeTime() {
+		return this.day == NFLGameDay.TH || this.day == NFLGameDay.SN || this.day == NFLGameDay.MN;
+	}
+	
 	// object variables
 	private int weekNumber;
 	private NFLGameDay day;

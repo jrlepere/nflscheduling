@@ -1,4 +1,4 @@
-package constraints;
+package constraintset.constraint;
 
 /**
  * An interface for Constraint definition.
