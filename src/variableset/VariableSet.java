@@ -1,27 +1,21 @@
 package variableset;
 
-import variableset.variables.Variable;
+import java.util.List;
 
-/**
- * An interface for a set of Variables, defined for problem specific optimization.
- * @author jlepere2
- * @date 09/22/2018
- */
-public interface VariableSet<V extends Variable<?,?>> {
-	
-	/**
-	 * Gets the next variable to try and set.
-	 * @return the next variable.
-	 * @throws Exception all variables are already set.
-	 */
-	public V getVariableToSet() throws Exception;
-	
-	/**
-	 * Tests if the variable set is complete.
-	 * @return true if the set is complete, false otherwise.
-	 */
+import constraints.Constraint;
+import values.Value;
+import variables.Variable;
+
+public interface VariableSet<V extends Variable<A>, A extends Value> extends Iterable<V> {
+
+	public V getUnassignedVariable();
+
 	public boolean isComplete();
 	
-	public int getNumberSet();
+	public boolean isAcceptable(V v);
+	
+	public int getCountSet();
+	
+	public List<Constraint<V>> getConstraintsByVariable(V v);
 	
 }

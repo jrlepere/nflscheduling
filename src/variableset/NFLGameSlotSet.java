@@ -2,98 +2,74 @@ package variableset;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.TreeMap;
 
+import constraints.ConsecutiveAwayGames;
+import constraints.ConsecutiveHomeGames;
+import constraints.Constraint;
+import constraints.MaxPrimeHomeTimeGames;
+import constraints.OneGamePerTeamPerWeek;
+import values.Matchup;
 import values.NFLGameDay;
-import values.NFLGameTime;
-import variableset.variables.NFLGameSlot;
+import values.Team;
+import values.TeamData;
+import variables.NFLGameSlot;
 
-/**
- * A structured set of NFL game slots to represent the weeks and day/times per week.
- * @author jlepere2
- * @date 09/22/2018
- */
-public class NFLGameSlotSet implements VariableSet<NFLGameSlot> {
+public class NFLGameSlotSet extends SharedDomainVariableSet<NFLGameSlot, Matchup> {
 
-	/**
-	 * Initializes a set structuring the NFL regular season scheduling.
-	 */
-	public NFLGameSlotSet() {
+	public NFLGameSlotSet(Scanner matchupScanner, Scanner teamDataScanner) {
 		
-		/* TODO
-		 * same variable in multiple lists
-		 * bye week
-		 */
+		// extract Team information
+		Map<String, Team> teams = new TreeMap<>();
+		teamDataScanner.nextLine();
+		int index = 0;
+		while (teamDataScanner.hasNextLine()) {
+			String[] teamData = teamDataScanner.nextLine().split(",");
+			teams.put(teamData[0], new Team(teamData[0], index, new TeamData(0, 0, 0)));
+			index += 1;
+		}
 		
-		// all game slots initialization
-		this.allGames = new LinkedList<>();
-		for (int i = 0; i < 16; i ++) {
-			this.allGames.add(new NFLGameSlot(this, new NFLGameTime(i, NFLGameDay.TH)));
-			this.allGames.add(new NFLGameSlot(this, new NFLGameTime(i, NFLGameDay.SN)));
-			this.allGames.add(new NFLGameSlot(this, new NFLGameTime(i, NFLGameDay.MN)));
+		// extract all matchups
+		matchupScanner.nextLine();
+		index = 0;
+		while (matchupScanner.hasNextLine()) {
+			String[] teamNames = matchupScanner.nextLine().split(",");
+			this.sharedDomain.add(new Matchup(teams.get(teamNames[0]), teams.get(teamNames[1]), index, 0));
+			index += 1;
+		}
+		
+		index = 0;
+		for (int i = 0; i < 16; i ++) { // TODO
+			this.freeVariables.add(new NFLGameSlot(this, index, i, NFLGameDay.TH));
+			this.freeVariables.add(new NFLGameSlot(this, index, i, NFLGameDay.SN));
+			this.freeVariables.add(new NFLGameSlot(this, index, i, NFLGameDay.MN));
 			for (int j = 0; j < 13; j ++) {
-				this.allGames.add(new NFLGameSlot(this, new NFLGameTime(i, NFLGameDay.S)));
+				this.freeVariables.add(new NFLGameSlot(this, index, i, NFLGameDay.S));
+			}
+			index += 1;
+		}
+		
+		List<Constraint<NFLGameSlot>> allConstraints = new LinkedList<>();
+		allConstraints.addAll(OneGamePerTeamPerWeek.getConstraints(this));
+		allConstraints.addAll(MaxPrimeHomeTimeGames.getConstraints(this, 3));
+		allConstraints.addAll(ConsecutiveHomeGames.getConstraints(this, 2));
+		allConstraints.addAll(ConsecutiveAwayGames.getConstraints(this, 2));
+		for (Constraint<NFLGameSlot> constraint : allConstraints) {
+			for (NFLGameSlot variable : constraint.getVariables()) {
+				if (!this.constraints.containsKey(variable)) {
+					List<Constraint<NFLGameSlot>> constraintsPerVariable = new LinkedList<>();
+					constraintsPerVariable.add(constraint);
+					this.constraints.put(variable, constraintsPerVariable);
+				} else {
+					List<Constraint<NFLGameSlot>> constraintsPerVariable = this.constraints.get(variable);
+					constraintsPerVariable.add(constraint);
+					this.constraints.put(variable, constraintsPerVariable);
+				}
 			}
 		}
 		
-		// current variables set count, will be set by variables
-		this.currentSetCount = 0;
-		
 	}
-	
-	/**
-	 * Gets a single list of all NFL game slots in the season.
-	 * @return a single list of all NFL game slots in the season.
-	 */
-	public List<NFLGameSlot> getAllGames() {
-		return this.allGames;
-	}
-	
-	/**
-	 * To be called by a variable to alert the set that a variable was initialized.
-	 */
-	public void variableSet() {
-		this.currentSetCount += 1;
-	}
-	
-	/**
-	 * TO be called by a variable to alert the set that a variable was freed.
-	 */
-	public void variableFreed() {
-		this.currentSetCount -= 1;
-	}
-	
-	public NFLGameSlot getVariableToSet() throws Exception {
-		for (NFLGameSlot gameSlot : this.allGames) {
-			if (!gameSlot.isSet()) {
-				return gameSlot;
-			}
-		}
-		throw new Exception("All Variables are already set!");
-	}
-
-	
-	public boolean isComplete() {
-		return this.currentSetCount == TOTAL_MATCHUPS;
-	}
-	
-	public int getNumberSet() {
-		return this.currentSetCount;
-	}
-	
-	public String toString() {
-		String s = "";
-		for (NFLGameSlot gs : this.allGames) {
-			s += gs.toString() + "\n";
-		}
-		return s;
-	}
-	
-	
-	// Maybe have two sets by week, primetime, all, etc.
-
-	// variables
-	private List<NFLGameSlot> allGames;
-	private int currentSetCount;
-	public static final int TOTAL_MATCHUPS = 256;
 	
 }

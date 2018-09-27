@@ -1,10 +1,10 @@
-package constraintset.constraint;
+package constraints;
 
 import java.util.LinkedList;
 import java.util.List;
 
+import variables.NFLGameSlot;
 import variableset.NFLGameSlotSet;
-import variableset.variables.NFLGameSlot;
 
 /**
  * Constraint definition that each team has only one game per week.
@@ -17,24 +17,32 @@ public class OneGamePerTeamPerWeek extends BinaryConstraint<NFLGameSlot> {
 		super(v1, v2);
 	}
 
-	public static List<Constraint> getConstraints(NFLGameSlotSet set) {
+	public static List<Constraint<NFLGameSlot>> getConstraints(NFLGameSlotSet set) {
 		
 		// order the game slots by week
 		List<List<NFLGameSlot>> gamesByWeek = new LinkedList<>();
 		for (int i = 0; i < 16; i ++) { // TODO
 			gamesByWeek.add(new LinkedList<>());
 		}
-		for (NFLGameSlot gs : set.getAllGames()) {
+		for (NFLGameSlot gs : set) {
 			gamesByWeek.get(gs.getWeekNumber()).add(gs);
 		}
 		
 		// create a binary constraint for each arc within each week
-		List<Constraint> constraints = new LinkedList<>();
+		List<Constraint<NFLGameSlot>> constraints = new LinkedList<>();
 		for (int weekNum = 0; weekNum < 16; weekNum ++) { // TODO
 			List<NFLGameSlot> gamesPerWeek = gamesByWeek.get(weekNum);
 			for (int gs1 = 0; gs1 < 16; gs1 ++) {
 				for (int gs2 = gs1+1; gs2 < 16; gs2 ++) {
-					constraints.add(new OneGamePerTeamPerWeek(gamesPerWeek.get(gs1), gamesPerWeek.get(gs2)));
+					
+					// get variables
+					NFLGameSlot v1 = gamesPerWeek.get(gs1);
+					NFLGameSlot v2 = gamesPerWeek.get(gs2);
+					
+					// add to list of constraints
+					constraints.add(new OneGamePerTeamPerWeek(v1, v2));
+					//constraints.add(new OneGamePerTeamPerWeek(v2, v1));
+					
 				}
 			}
 		}
