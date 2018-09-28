@@ -42,11 +42,27 @@ public class NFLGameSlotSet extends SharedDomainVariableSet<NFLGameSlot, Matchup
 		
 		index = 0;
 		for (int i = 0; i < 16; i ++) { // TODO
-			this.freeVariables.add(new NFLGameSlot(this, index, i, NFLGameDay.TH));
-			this.freeVariables.add(new NFLGameSlot(this, index, i, NFLGameDay.SN));
-			this.freeVariables.add(new NFLGameSlot(this, index, i, NFLGameDay.MN));
+			// TH
+			NFLGameSlot th = new NFLGameSlot(this, index, i, NFLGameDay.TH);
+			this.domainReductions.put(th, new DomainReduction<>(this.sharedDomain.size()));
+			this.constraints.put(th, new LinkedList<>());
+			this.freeVariables.add(th);
+			// SN
+			NFLGameSlot sn = new NFLGameSlot(this, index, i, NFLGameDay.SN);
+			this.domainReductions.put(sn, new DomainReduction<>(this.sharedDomain.size()));
+			this.constraints.put(sn, new LinkedList<>());
+			this.freeVariables.add(sn);
+			// MN
+			NFLGameSlot mn = new NFLGameSlot(this, index, i, NFLGameDay.MN);
+			this.domainReductions.put(mn, new DomainReduction<>(this.sharedDomain.size()));
+			this.constraints.put(mn, new LinkedList<>());
+			this.freeVariables.add(mn);
 			for (int j = 0; j < 13; j ++) {
-				this.freeVariables.add(new NFLGameSlot(this, index, i, NFLGameDay.S));
+				// S
+				NFLGameSlot s = new NFLGameSlot(this, index, i, NFLGameDay.S);
+				this.domainReductions.put(s, new DomainReduction<>(this.sharedDomain.size()));
+				this.constraints.put(s, new LinkedList<>());
+				this.freeVariables.add(s);
 			}
 			index += 1;
 		}
@@ -54,19 +70,11 @@ public class NFLGameSlotSet extends SharedDomainVariableSet<NFLGameSlot, Matchup
 		List<Constraint<NFLGameSlot>> allConstraints = new LinkedList<>();
 		allConstraints.addAll(OneGamePerTeamPerWeek.getConstraints(this));
 		//allConstraints.addAll(MaxPrimeHomeTimeGames.getConstraints(this, 3));
-		allConstraints.addAll(ConsecutiveHomeGames.getConstraints(this, 2));
-		allConstraints.addAll(ConsecutiveAwayGames.getConstraints(this, 2));
+		//allConstraints.addAll(ConsecutiveHomeGames.getConstraints(this, 2));
+		//allConstraints.addAll(ConsecutiveAwayGames.getConstraints(this, 2));
 		for (Constraint<NFLGameSlot> constraint : allConstraints) {
 			for (NFLGameSlot variable : constraint.getVariables()) {
-				if (!this.constraints.containsKey(variable)) {
-					List<Constraint<NFLGameSlot>> constraintsPerVariable = new LinkedList<>();
-					constraintsPerVariable.add(constraint);
-					this.constraints.put(variable, constraintsPerVariable);
-				} else {
-					List<Constraint<NFLGameSlot>> constraintsPerVariable = this.constraints.get(variable);
-					constraintsPerVariable.add(constraint);
-					this.constraints.put(variable, constraintsPerVariable);
-				}
+				this.constraints.get(variable).add(constraint);
 			}
 		}
 		

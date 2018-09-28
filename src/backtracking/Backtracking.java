@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import constraints.Constraint;
 import values.Value;
 import variables.Variable;
+import variableset.DomainReduction;
 import variableset.SharedDomainVariableSet;
 
 public class Backtracking {
@@ -35,10 +36,10 @@ public class Backtracking {
 			if (variableSet.isAcceptable(var) && INFER(variableSet, var)) {
 				
 				// domain reduction
-				Map<V, List<A>> domainReduction = FORWARD_CHECK(variableSet, var);
+				Map<V, DomainReduction<A>> domainReduction = FORWARD_CHECK(variableSet, var);
 				
 				// add domain reduction to set
-				variableSet.addDomainReduction(domainReduction);
+				//variableSet.addDomainReduction(domainReduction);
 				
 				// backtrack
 				boolean result = BACKTRACK(variableSet);
@@ -108,18 +109,19 @@ public class Backtracking {
 		return true;
 	}
 	
-	private static <V extends Variable<A>, A extends Value> Map<V, List<A>> FORWARD_CHECK(SharedDomainVariableSet<V, A> variableSet, V var) {
+	private static <V extends Variable<A>, A extends Value> Map<V, DomainReduction<A>> FORWARD_CHECK(SharedDomainVariableSet<V, A> variableSet, V var) {
 		/*
 		 * For each Y constrained by X, remove values from Y domain that are inconsistent with the value chosen for X
 		 */
 		
-		// map of variable to not possibilities
-		Map<V, List<A>> domainReduction = new TreeMap<>();
+		// map of variable to not possible domain values
+		Map<V, DomainReduction<A>> domainReduction = new TreeMap<>();
 		
-		// get all constraints on the variable
-		List<Constraint<V>> constraints = variableSet.getConstraintsByVariable(var);
+		// map of variables constrained by the input variable, and their constraints
+		Map<V, List<Constraint<V>>> constrainedVariables = new TreeMap<>();
 		
-		for (Constraint<V> constraint : constraints) {
+		// for each constraint on the variable
+		for (Constraint<V> constraint : variableSet.getConstraintsByVariable(var)) {
 			
 			// get free variables in the constraint
 			List<V> freeVariables = new LinkedList<>();
@@ -133,20 +135,99 @@ public class Backtracking {
 			// to the acceptance of the constraint
 			if (freeVariables.size() == 1) {
 				V v = freeVariables.remove(0);
-				List<A> reductions = new LinkedList<>();
-				for (A val : variableSet.getDomain(var)) {
-					v.assign(val);
-					if (!constraint.isAcceptable()) {
-						reductions.add(val);
-					}
-					v.unassign();
+				if (!constrainedVariables.containsKey(v)) {
+					List<Constraint<V>> vDependentConstraints = new LinkedList<>();
+					vDependentConstraints.add(constraint);
+					constrainedVariables.put(v, vDependentConstraints);
+				} else {
+					constrainedVariables.get(v).add(constraint);
 				}
-				domainReduction.put(v, reductions);
 			}
 			
 		}
 		
+		// for each constrained variable, remove values in domain that make it a failure
+		for (V v : constrainedVariables.keySet()) {
+			domainReduction.put(v, new DomainReduction<A>(256)); // TODO
+			while (true) {
+				DomainReduction<A> reductions = new DomainReduction<>(256); // TODO
+				for (Constraint<V> c : constrainedVariables.get(v)) {
+					for (A val : variableSet.getDomain(v)) {
+						v.assign(val);
+						if (!c.isAcceptable()) {
+							reductions.add(val);
+						}
+						v.unassign();
+					}
+				}
+				if (!reductions.isEmpty()) {
+					// some reductions we make, reduce and try again
+					variableSet.addDomainReduction(v, reductions);
+					domainReduction.get(v).addAll(reductions);
+					break;
+				} else {
+					// no reductions were made
+					break;
+				}
+			}
+		}
+		
 		return domainReduction;
+		
+	}
+	
+	private static <V extends Variable<A>, A extends Value> boolean DEEP_INFERENCE(SharedDomainVariableSet<V, A> variableSet, V var) {
+		/*
+		 * For each Y constrained by X, remove values from Y domain that are inconsistent with the value chosen for X
+		 */
+		
+		// map of variables constrained by the input variable, and their constraints
+		Map<V, List<Constraint<V>>> constrainedVariables = new TreeMap<>();
+		
+		// for each constraint on the variable
+		for (Constraint<V> constraint : variableSet.getConstraintsByVariable(var)) {
+			
+			// get free variables in the constraint
+			List<V> freeVariables = new LinkedList<>();
+			for (V v : constraint.getVariables()) {
+				if (!v.isSet()) {
+					freeVariables.add(v);
+				}
+			}
+			
+			// domain reduction only if exactly one variable contributing
+			// to the acceptance of the constraint
+			if (freeVariables.size() == 1) {
+				V v = freeVariables.remove(0);
+				if (!constrainedVariables.containsKey(v)) {
+					List<Constraint<V>> vDependentConstraints = new LinkedList<>();
+					vDependentConstraints.add(constraint);
+					constrainedVariables.put(v, vDependentConstraints);
+				} else {
+					constrainedVariables.get(v).add(constraint);
+				}
+			}
+			
+		}
+		
+		// for each constrained variable, remove values in domain that make it a failure
+		for (V v : constrainedVariables.keySet()) {
+			boolean foundOneAcceptable = false;
+			for (Constraint<V> c : constrainedVariables.get(v)) {
+				for (A val : variableSet.getDomain(v)) {
+					v.assign(val);
+					if (c.isAcceptable()) {
+						foundOneAcceptable = true;
+					}
+					v.unassign();
+				}
+			}
+			if (!foundOneAcceptable) {
+				return false;
+			}
+		}
+		
+		return true;
 		
 	}
 	
