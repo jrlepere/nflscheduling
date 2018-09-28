@@ -46,7 +46,7 @@ public class NFLGameSlot implements Variable<Matchup>, Comparable<NFLGameSlot> {
 	}
 	
 	public List<Matchup> orderDomainValues() {
-		return this.parentSet.getDomain();
+		return this.parentSet.getDomain(this);
 	}
 
 	public void assign(Matchup value) {

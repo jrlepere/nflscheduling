@@ -33,10 +33,25 @@ public abstract class SharedDomainVariableSet<V extends Variable<A>, A extends V
 		setVariables = new LinkedList<>();
 		sharedDomain = new LinkedList<>();
 		constraints = new TreeMap<>();
+		domainReductions = new TreeMap<>();
 	}
 	
-	public List<A> getDomain() {
-		return this.sharedDomain;
+	public List<A> getDomain(V v) {
+		if (!this.domainReductions.containsKey(v)) {
+			return new LinkedList<>(this.sharedDomain);
+		}
+		List<A> domainReduction = this.domainReductions.get(v);
+		if (domainReduction.isEmpty()) {
+			return new LinkedList<>(this.sharedDomain);
+		}
+		List<A> domain = new LinkedList<>();
+		for (A a : this.sharedDomain) {
+			if (!domainReduction.contains(a)) {
+				domain.add(a);
+			}
+		}
+		return domain;
+		
 	}
 	
 	public void notifyAssignment(V variable, A value) {
@@ -51,13 +66,24 @@ public abstract class SharedDomainVariableSet<V extends Variable<A>, A extends V
 		this.sharedDomain.add(value);
 	}
 	
-	public V getUnassignedVariable() {
-		for (V v : freeVariables) {
-			if (!v.isSet()) {
-				return v;
+	public void addDomainReduction(Map<V, List<A>> reductions) {
+		for (V v : reductions.keySet()) {
+			if (!this.domainReductions.containsKey(v)) {
+				this.domainReductions.put(v, new LinkedList<>(reductions.get(v)));
+			} else {
+				this.domainReductions.get(v).addAll(reductions.get(v));
 			}
 		}
-		return null;
+	}
+	
+	public void clearDomainReduction(Map<V, List<A>> reductions) {
+		for (V v : reductions.keySet()) {
+			this.domainReductions.get(v).removeAll(reductions.get(v));
+		}
+	}
+	
+	public V getUnassignedVariable() {
+		return freeVariables.remove();
 	}
 
 	public boolean isComplete() {
@@ -107,5 +133,6 @@ public abstract class SharedDomainVariableSet<V extends Variable<A>, A extends V
 	protected List<V> setVariables;
 	protected List<A> sharedDomain;
 	protected Map<V, List<Constraint<V>>> constraints;
+	private Map<V, List<A>> domainReductions; // TODO initialize by each variable
 
 }

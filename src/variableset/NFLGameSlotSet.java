@@ -53,7 +53,7 @@ public class NFLGameSlotSet extends SharedDomainVariableSet<NFLGameSlot, Matchup
 		
 		List<Constraint<NFLGameSlot>> allConstraints = new LinkedList<>();
 		allConstraints.addAll(OneGamePerTeamPerWeek.getConstraints(this));
-		allConstraints.addAll(MaxPrimeHomeTimeGames.getConstraints(this, 3));
+		//allConstraints.addAll(MaxPrimeHomeTimeGames.getConstraints(this, 3));
 		allConstraints.addAll(ConsecutiveHomeGames.getConstraints(this, 2));
 		allConstraints.addAll(ConsecutiveAwayGames.getConstraints(this, 2));
 		for (Constraint<NFLGameSlot> constraint : allConstraints) {
