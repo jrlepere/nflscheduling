@@ -35,26 +35,29 @@ public class Backtracking {
 			var.assign(val);
 			
 			// test acceptability and infer the feasibility of the assignment  && INFER(variableSet, var)
-			if (variableSet.isAcceptable(var) && INFER(variableSet, var)) {
+			if (variableSet.isAcceptable(var)) {
 				
 				try {
 					
 					// domain reduction, throws exception if invalid
-					Map<V, DomainReduction<A>> domainReduction = FORWARD_CHECK(variableSet, var);
+					Map<V, DomainReduction<A>> domainReduction2 = FORWARD_CHECK2(variableSet, var);
+					
+					//Map<V, DomainReduction<A>> domainReduction = FORWARD_CHECK(variableSet, var);
 					
 					// add domain reduction to set
 					//variableSet.addDomainReduction(domainReduction);
 					
 					// backtrack
-					boolean result = BACKTRACK(variableSet);
+					//boolean result = BACKTRACK(variableSet);
 					
 					// stop if solution found
-					if (result) {
-						return result;
+					if (INFER(variableSet, var) && BACKTRACK(variableSet)) {
+						return true;
 					}
 					
 					// clear domain reduction
-					variableSet.clearDomainReduction(domainReduction);
+					//variableSet.clearDomainReduction(domainReduction);
+					variableSet.clearDomainReduction(domainReduction2);
 				} catch (Exception e) {
 					
 				}
@@ -114,7 +117,7 @@ public class Backtracking {
 		}
 		
 		// backtracking
-		return true;
+		return false;
 	}
 	
 	private static <V extends Variable<A>, A extends Value> Map<V, DomainReduction<A>> FORWARD_CHECK(SharedDomainVariableSet<V, A> variableSet, V var) throws Exception {
@@ -182,6 +185,110 @@ public class Backtracking {
 					// no reductions were made
 					break;
 				}
+			}
+		}
+		
+		return domainReduction;
+		
+	}
+	
+	private static <V extends Variable<A>, A extends Value> Map<V, DomainReduction<A>> FORWARD_CHECK2(SharedDomainVariableSet<V, A> variableSet, V var) throws Exception {
+		/*
+		 * For each Y constrained by X, remove values from Y domain that are inconsistent with the value chosen for X
+		 */
+		
+		// map of variable to not possible domain values
+		Map<V, DomainReduction<A>> domainReduction = new TreeMap<>();
+		
+		List<Constraint<V>> unsetConstraints = new LinkedList<>();
+		for (Constraint<V> constraint : variableSet.getConstraintsByVariable(var)) {
+			
+			// get free variables in the constraint
+			List<V> freeVariables = new LinkedList<>();
+			for (V v : constraint.getVariables()) {
+				if (!v.isSet()) {
+					freeVariables.add(v);
+				}
+			}
+			
+			if (!freeVariables.isEmpty()) {
+				unsetConstraints.add(constraint);
+			}
+		}
+		
+		
+		while (true) {
+			
+			boolean reductionMade = false;
+			// for each constraint on the variable
+			for (Constraint<V> constraint : unsetConstraints) {
+				
+				// get free variables in the constraint
+				List<V> freeVariables = new LinkedList<>();
+				for (V v : constraint.getVariables()) {
+					if (!v.isSet()) {
+						freeVariables.add(v);
+					}
+				}
+				
+				// continue if no variables to set for constraint, assumed to already be acceptable
+				if (freeVariables.isEmpty()) {
+					continue;
+				}
+				
+				// copy free variables
+				List<V> freeVariablesCopy = new LinkedList<>(freeVariables);
+				
+				while (true) {
+					Map<V, DomainReduction<A>> reductions = new TreeMap<>();
+					
+					for (V freeVariable : freeVariables) {
+						
+						reductions.put(freeVariable, new DomainReduction<>(256)); // TODO
+						
+						freeVariablesCopy.remove(freeVariable);
+						
+						List<A> domain = variableSet.getDomain(freeVariable);
+						if (domain.isEmpty()) {
+							variableSet.clearDomainReduction(domainReduction);
+							throw new Exception();
+						}
+						for (A val : domain) {
+							freeVariable.assign(val);
+							if (!FIND_COMBINATION(variableSet, freeVariablesCopy, constraint)) {
+								reductions.get(freeVariable).add(val);
+							}
+							freeVariable.unassign();
+						}
+						freeVariablesCopy.add(freeVariable);
+					}
+					
+					boolean noReduction = true;
+					
+					for (V freeVariable : freeVariables) {
+						DomainReduction<A> reduc = reductions.get(freeVariable);
+						if (!reduc.isEmpty()) {
+							variableSet.addDomainReduction(freeVariable, reduc);
+							if (!domainReduction.containsKey(freeVariable)) {
+								domainReduction.put(freeVariable, reduc);
+							} else {
+								domainReduction.get(freeVariable).addAll(reduc);
+							}
+							noReduction = false;
+							reductionMade = true;
+						}
+					}
+					
+					if (noReduction) {
+						break;
+					}
+						
+				}
+				
+			}
+			
+			if (!reductionMade) {
+				break;
 			}
 		}
 		
