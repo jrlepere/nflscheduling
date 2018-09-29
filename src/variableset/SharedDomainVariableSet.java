@@ -102,7 +102,7 @@ public abstract class SharedDomainVariableSet<V extends Variable<A>, A extends V
 	}
 	
 	public V getUnassignedVariable() {
-		return freeVariables.remove();
+		return freeVariables.peek();
 	}
 
 	public boolean isComplete() {

@@ -32,7 +32,7 @@ public class Backtracking {
 			// add the assignment
 			var.assign(val);
 			
-			// test acceptability and infer the feasibility of the assignment
+			// test acceptability and infer the feasibility of the assignment  && INFER(variableSet, var)
 			if (variableSet.isAcceptable(var) && INFER(variableSet, var)) {
 				
 				// domain reduction
@@ -145,6 +145,8 @@ public class Backtracking {
 			}
 			
 		}
+		
+		int x = 0;
 		
 		// for each constrained variable, remove values in domain that make it a failure
 		for (V v : constrainedVariables.keySet()) {
