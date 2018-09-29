@@ -37,6 +37,9 @@ public abstract class SharedDomainVariableSet<V extends Variable<A>, A extends V
 				}*/
 				int mrv = domainReductions.get(arg1).size() - domainReductions.get(arg0).size();
 				if (mrv != 0) {
+					System.out.println("Jmjg");
+				}
+				if (mrv != 0) {
 					return mrv;
 				} else {
 					return constraints.get(arg1).size() - constraints.get(arg0).size();
@@ -130,11 +133,7 @@ public abstract class SharedDomainVariableSet<V extends Variable<A>, A extends V
 	}
 	
 	public List<Constraint<V>> getConstraintsByVariable(V v) {
-		if (constraints.containsKey(v)) {
-			return constraints.get(v);
-		} else {
-			return new LinkedList<>();
-		}
+		return constraints.get(v);
 	}
 	
 	public String toString() {

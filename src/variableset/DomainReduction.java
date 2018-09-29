@@ -58,10 +58,14 @@ public class DomainReduction <A extends Value> {
 			return;
 		}
 		for (int i = 0; i < reduction.reducedValues.length; i ++) {
+			if (reducedValues[i] == 0 && reduction.reducedValues[i] == 1) {
+				System.out.println("ERR");
+			}
 			if (reduction.reducedValues[i] != 0 && this.reducedValues[i] == 1) {
 				reducedValues[i] = 0;
 				size -= 1;
 			}
+			
 		}
 	}
 	

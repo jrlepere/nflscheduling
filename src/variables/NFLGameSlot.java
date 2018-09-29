@@ -68,7 +68,7 @@ public class NFLGameSlot implements Variable<Matchup>, Comparable<NFLGameSlot> {
 	}
 	
 	public String toString() {
-		return this.matchup.toString();
+		return matchup != null ? index + ": " + this.matchup.toString() : index + "";
 	}
 	
 	private NFLGameSlotSet parentSet;
