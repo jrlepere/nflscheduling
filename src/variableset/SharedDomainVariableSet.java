@@ -1,13 +1,13 @@
 package variableset;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.TreeMap;
 
 import constraints.Constraint;
 import values.Value;
@@ -37,9 +37,6 @@ public abstract class SharedDomainVariableSet<V extends Variable<A>, A extends V
 				}*/
 				int mrv = domainReductions.get(arg1).size() - domainReductions.get(arg0).size();
 				if (mrv != 0) {
-					System.out.println("Jmjg");
-				}
-				if (mrv != 0) {
 					return mrv;
 				} else {
 					return constraints.get(arg1).size() - constraints.get(arg0).size();
@@ -49,8 +46,8 @@ public abstract class SharedDomainVariableSet<V extends Variable<A>, A extends V
 		});
 		setVariables = new LinkedList<>();
 		sharedDomain = new LinkedList<>();
-		constraints = new TreeMap<>();
-		domainReductions = new TreeMap<>();
+		constraints = new HashMap<>(256); // TODO
+		domainReductions = new HashMap<>(256);
 	}
 	
 	public List<A> getDomain(V v) {

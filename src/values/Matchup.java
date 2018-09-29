@@ -44,6 +44,18 @@ public class Matchup implements Value {
 		return this.index;
 	}
 	
+	public int similarity(Value a) {
+		// 0 if not similar
+		Matchup m = (Matchup) a;
+		if (this.homeTeam == m.homeTeam
+				|| this.homeTeam == m.awayTeam
+				|| this.awayTeam == m.homeTeam
+				|| this.awayTeam == m.awayTeam) {
+			return 1;
+		}
+		return 0;
+	}
+	
 	/**
 	 * Gets the matchup score.
 	 * @return the score of the matchup.
@@ -54,6 +66,10 @@ public class Matchup implements Value {
 	
 	public String toString() {
 		return this.awayTeam + " @ " + this.homeTeam;
+	}
+	
+	public int hashCode() {
+		return index;
 	}
 	
 	// variables

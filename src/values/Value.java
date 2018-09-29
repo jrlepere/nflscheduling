@@ -13,4 +13,6 @@ public interface Value {
 	 */
 	public int getIndex();
 	
+	public int similarity(Value a);
+	
 }

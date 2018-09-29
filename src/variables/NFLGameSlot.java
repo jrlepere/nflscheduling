@@ -45,6 +45,10 @@ public class NFLGameSlot implements Variable<Matchup>, Comparable<NFLGameSlot> {
 		return this.gameDay == NFLGameDay.TH || this.gameDay == NFLGameDay.SN || this.gameDay == NFLGameDay.MN;
 	}
 	
+	public int getIndex() {
+		return index;
+	}
+	
 	public List<Matchup> orderDomainValues() {
 		return this.parentSet.getDomain(this);
 	}
@@ -68,7 +72,12 @@ public class NFLGameSlot implements Variable<Matchup>, Comparable<NFLGameSlot> {
 	}
 	
 	public String toString() {
-		return matchup != null ? index + ": " + this.matchup.toString() : index + "";
+		String s = weekNumber + " " + gameDay + ": ";
+		return matchup != null ? s + this.matchup.toString() : s;
+	}
+	
+	public int hashCode() {
+		return index;
 	}
 	
 	private NFLGameSlotSet parentSet;

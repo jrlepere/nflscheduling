@@ -14,4 +14,6 @@ public interface Variable<A extends Value> {
 	
 	public boolean isSet();
 	
+	public int getIndex();
+	
 }

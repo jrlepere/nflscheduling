@@ -50,6 +50,10 @@ public class Team implements Comparable<Team> {
 		return this.name;
 	}
 	
+	public int hashCode() {
+		return index;
+	}
+	
 	public int compareTo(Team arg0) {
 		return this.name.compareTo(arg0.name);
 	}

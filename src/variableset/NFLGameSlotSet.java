@@ -1,5 +1,7 @@
 package variableset;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +11,8 @@ import java.util.TreeMap;
 import constraints.ConsecutiveAwayGames;
 import constraints.ConsecutiveHomeGames;
 import constraints.Constraint;
-import constraints.MaxPrimeHomeTimeGames;
+import constraints.MaxPrimeTimeGames;
+import constraints.MaxPrimeTimeHomeGames;
 import constraints.OneGamePerTeamPerWeek;
 import values.Matchup;
 import values.NFLGameDay;
@@ -70,17 +73,34 @@ public class NFLGameSlotSet extends SharedDomainVariableSet<NFLGameSlot, Matchup
 			}
 		}
 		
+		//Collections.shuffle(this.sharedDomain);
+		
 		List<Constraint<NFLGameSlot>> allConstraints = new LinkedList<>();
 		allConstraints.addAll(OneGamePerTeamPerWeek.getConstraints(this));
-		//allConstraints.addAll(MaxPrimeHomeTimeGames.getConstraints(this, 3));
-		//allConstraints.addAll(ConsecutiveHomeGames.getConstraints(this, 2));
-		//allConstraints.addAll(ConsecutiveAwayGames.getConstraints(this, 2));
+		allConstraints.addAll(MaxPrimeTimeHomeGames.getConstraints(this, 2));
+		allConstraints.addAll(MaxPrimeTimeGames.getConstraints(this, 3));
+		allConstraints.addAll(ConsecutiveHomeGames.getConstraints(this, 2));
+		allConstraints.addAll(ConsecutiveAwayGames.getConstraints(this, 2));
 		for (Constraint<NFLGameSlot> constraint : allConstraints) {
 			for (NFLGameSlot variable : constraint.getVariables()) {
 				this.constraints.get(variable).add(constraint);
 			}
 		}
 		
+	}
+	
+	public String toString() {
+		Collections.sort(setVariables, new Comparator<NFLGameSlot>() {
+			public int compare(NFLGameSlot arg0, NFLGameSlot arg1) {
+				// TODO Auto-generated method stub
+				return arg0.getIndex() - arg1.getIndex();
+			}
+		});
+		String s = "";
+		for (NFLGameSlot v : setVariables) {
+			s += v.toString() + "\n";
+		}
+		return s;
 	}
 	
 }

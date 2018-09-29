@@ -1,9 +1,10 @@
 package backtracking;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Queue;
 
 import constraints.Constraint;
 import values.Value;
@@ -13,6 +14,7 @@ import variableset.SharedDomainVariableSet;
 
 public class Backtracking {
 	
+	static int x = 0;
 	public static <V extends Variable<A>, A extends Value> boolean SOLVE(SharedDomainVariableSet<V, A> variableSet) throws Exception {
 		
 		return BACKTRACK(variableSet);
@@ -25,7 +27,8 @@ public class Backtracking {
 		
 		// get variable to assign
 		V var = variableSet.getUnassignedVariable();
-		System.out.println(variableSet.getCountSet() + ": " + var);
+		System.out.println(x + " --> " + variableSet.getCountSet() + ": " + var.getIndex());
+		x += 1;
 		//System.out.println(var);
 		
 		// for each possible value
@@ -35,8 +38,8 @@ public class Backtracking {
 			var.assign(val);
 			
 			// test acceptability and infer the feasibility of the assignment  && INFER(variableSet, var)
-			if (variableSet.isAcceptable(var)) {
-				
+			if (INFER(variableSet, var)) {
+			//if (true) {	
 				try {
 					
 					// domain reduction, throws exception if invalid
@@ -85,7 +88,7 @@ public class Backtracking {
 		
 		for (Constraint<V> constraint : constraints) {
 			// get all the variables that need to be set for this constraint
-			List<V> variablesToSet = new LinkedList<>();
+			Queue<V> variablesToSet = new LinkedList<>();
 			for (V v : constraint.getVariables()) {
 				if (!v.isSet()) {
 					variablesToSet.add(v);
@@ -100,12 +103,12 @@ public class Backtracking {
 		return true;
 	}
 	
-	private static <V extends Variable<A>, A extends Value> boolean FIND_COMBINATION(SharedDomainVariableSet<V, A> variableSet, List<V> variables, Constraint<V> constraint) {
+	private static <V extends Variable<A>, A extends Value> boolean FIND_COMBINATION(SharedDomainVariableSet<V, A> variableSet, Queue<V> variables, Constraint<V> constraint) {
 		if (variables.isEmpty()) {
 			return constraint.isAcceptable();
 		}
 		
-		V v = variables.remove(0);
+		V v = variables.remove();
 		for (A a : variableSet.getDomain(v)) {
 			v.assign(a);
 			boolean acceptable = FIND_COMBINATION(variableSet, variables, constraint);
@@ -120,133 +123,50 @@ public class Backtracking {
 		return false;
 	}
 	
-	private static <V extends Variable<A>, A extends Value> Map<V, DomainReduction<A>> FORWARD_CHECK(SharedDomainVariableSet<V, A> variableSet, V var) throws Exception {
-		/*
-		 * For each Y constrained by X, remove values from Y domain that are inconsistent with the value chosen for X
-		 */
-		
-		// map of variable to not possible domain values
-		Map<V, DomainReduction<A>> domainReduction = new TreeMap<>();
-		
-		// map of variables constrained by the input variable, and their constraints
-		Map<V, List<Constraint<V>>> constrainedVariables = new TreeMap<>();
-		
-		// for each constraint on the variable
-		for (Constraint<V> constraint : variableSet.getConstraintsByVariable(var)) {
-			
-			// get free variables in the constraint
-			List<V> freeVariables = new LinkedList<>();
-			for (V v : constraint.getVariables()) {
-				if (!v.isSet()) {
-					freeVariables.add(v);
-				}
-			}
-			
-			// domain reduction only if exactly one variable contributing
-			// to the acceptance of the constraint
-			if (freeVariables.size() == 1) {
-				V v = freeVariables.remove(0);
-				if (!constrainedVariables.containsKey(v)) {
-					List<Constraint<V>> vDependentConstraints = new LinkedList<>();
-					vDependentConstraints.add(constraint);
-					constrainedVariables.put(v, vDependentConstraints);
-				} else {
-					constrainedVariables.get(v).add(constraint);
-				}
-			}
-			
-		}
-		
-		// for each constrained variable, remove values in domain that make it a failure
-		for (V v : constrainedVariables.keySet()) {
-			domainReduction.put(v, new DomainReduction<A>(256)); // TODO
-			while (true) {
-				DomainReduction<A> reductions = new DomainReduction<>(256); // TODO
-				for (Constraint<V> c : constrainedVariables.get(v)) {
-					List<A> domain = variableSet.getDomain(v);
-					if (domain.isEmpty()) {
-						variableSet.clearDomainReduction(domainReduction);
-						throw new Exception();
-					}
-					for (A val : domain) {
-						v.assign(val);
-						if (!c.isAcceptable()) {
-							reductions.add(val); // TODO optimize
-						}
-						v.unassign();
-					}
-				}
-				if (!reductions.isEmpty()) {
-					// made some reductions, reduce and try again
-					variableSet.addDomainReduction(v, reductions);
-					domainReduction.get(v).addAll(reductions);
-					//break;
-				} else {
-					// no reductions were made
-					break;
-				}
-			}
-		}
-		
-		return domainReduction;
-		
-	}
-	
 	private static <V extends Variable<A>, A extends Value> Map<V, DomainReduction<A>> FORWARD_CHECK2(SharedDomainVariableSet<V, A> variableSet, V var) throws Exception {
 		/*
 		 * For each Y constrained by X, remove values from Y domain that are inconsistent with the value chosen for X
 		 */
 		
 		// map of variable to not possible domain values
-		Map<V, DomainReduction<A>> domainReduction = new TreeMap<>();
+		Map<V, DomainReduction<A>> domainReduction = new HashMap<>(256);
 		
-		List<Constraint<V>> unsetConstraints = new LinkedList<>();
+		// map of constraints to unset variables
+		Map<Constraint<V>, Queue<V>> unsetConstraints = new HashMap<>();
 		for (Constraint<V> constraint : variableSet.getConstraintsByVariable(var)) {
 			
 			// get free variables in the constraint
-			List<V> freeVariables = new LinkedList<>();
+			Queue<V> freeVariables = new LinkedList<>();
 			for (V v : constraint.getVariables()) {
 				if (!v.isSet()) {
 					freeVariables.add(v);
 				}
 			}
 			
+			// add only if number of free variables is not empty
 			if (!freeVariables.isEmpty()) {
-				unsetConstraints.add(constraint);
+				unsetConstraints.put(constraint, freeVariables);
 			}
 		}
 		
 		
 		while (true) {
 			
-			boolean reductionMade = false;
+			// made at least one reduction for all constraints
+			boolean madeReductionAll = false;
+			
 			// for each constraint on the variable
-			for (Constraint<V> constraint : unsetConstraints) {
+			for (Constraint<V> constraint : unsetConstraints.keySet()) {
 				
-				// get free variables in the constraint
-				List<V> freeVariables = new LinkedList<>();
-				for (V v : constraint.getVariables()) {
-					if (!v.isSet()) {
-						freeVariables.add(v);
-					}
-				}
-				
-				// continue if no variables to set for constraint, assumed to already be acceptable
-				if (freeVariables.isEmpty()) {
-					continue;
-				}
-				
-				// copy free variables
-				List<V> freeVariablesCopy = new LinkedList<>(freeVariables);
+				Queue<V> freeVariables = unsetConstraints.get(constraint);
 				
 				while (true) {
-					Map<V, DomainReduction<A>> reductions = new TreeMap<>();
+					Map<V, DomainReduction<A>> reductions = new HashMap<>(256);
 					
-					for (V freeVariable : freeVariables) {
+					for (int i = 0; i < freeVariables.size(); i ++) {
+						V freeVariable = freeVariables.remove();
 						
 						reductions.put(freeVariable, new DomainReduction<>(256)); // TODO
-						
-						freeVariablesCopy.remove(freeVariable);
 						
 						List<A> domain = variableSet.getDomain(freeVariable);
 						if (domain.isEmpty()) {
@@ -255,12 +175,12 @@ public class Backtracking {
 						}
 						for (A val : domain) {
 							freeVariable.assign(val);
-							if (!FIND_COMBINATION(variableSet, freeVariablesCopy, constraint)) {
+							if (!FIND_COMBINATION(variableSet, freeVariables, constraint)) {
 								reductions.get(freeVariable).add(val);
 							}
 							freeVariable.unassign();
 						}
-						freeVariablesCopy.add(freeVariable);
+						freeVariables.add(freeVariable);
 					}
 					
 					boolean noReduction = true;
@@ -275,7 +195,7 @@ public class Backtracking {
 								domainReduction.get(freeVariable).addAll(reduc);
 							}
 							noReduction = false;
-							reductionMade = true;
+							madeReductionAll = true;
 						}
 					}
 					
@@ -287,7 +207,7 @@ public class Backtracking {
 				
 			}
 			
-			if (!reductionMade) {
+			if (!madeReductionAll) {
 				break;
 			}
 		}
